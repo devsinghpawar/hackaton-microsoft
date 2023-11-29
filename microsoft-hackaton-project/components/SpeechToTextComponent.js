@@ -61,6 +61,24 @@ const SpeechToTextComponent = () => {
     };
   }, []);
 
+  const textDBConnection = async () => {
+    try {
+      const url = "http://localhost:3000/api/testApi";
+      const response = await fetch(url);
+  
+      if (response.ok) {
+        const text = await response.json();
+        console.log(text?.message);
+      } else {
+        const errorText = await response.text(); // Assuming error response is text
+        console.log(`Error: ${response.status}`, JSON.stringify(errorText));
+      }
+    } catch (error) {
+      console.error("An error occurred:", error);
+    }
+  };
+  
+
   const pauseListening = () => {
     setIsListening(false);
     recognizer.current.stopContinuousRecognitionAsync();
@@ -96,6 +114,9 @@ const SpeechToTextComponent = () => {
         </button>
         <button className={styles.btn} onClick={stopListening}>
           Stop Listening
+        </button>
+        <button className={styles.btn} onClick={textDBConnection}>
+          Test Database
         </button>
       </div>
       <div>
