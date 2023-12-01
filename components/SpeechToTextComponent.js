@@ -63,7 +63,7 @@ const SpeechToTextComponent = () => {
 
   const textDBConnection = async () => {
     try {
-      const url = "http://localhost:3000/api/testApi";
+      const url = "https://hear-able.vercel.app/api/testApi";
       const response = await fetch(url);
   
       if (response.ok) {
