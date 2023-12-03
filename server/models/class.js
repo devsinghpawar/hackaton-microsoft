@@ -13,7 +13,7 @@ const classSchema = new Schema({
   },
   textTranscript: {
     type: String,
-    required: true,
+    // required: true,
   },
 });
 

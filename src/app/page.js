@@ -1,18 +1,27 @@
 "use client";
 // react
-import { useEffect, useState } from "react";
+
+import React, { useState, useEffect } from "react";
+
 import Image from "next/image";
 
 // components
-import SpeechToTextComponent from "../../components/SpeechToTextComponent";
-import TextToSpeechComponent from "../../components/TextToSpeechComponent";
+import SpeechToTextComponent from "./components/SpeechToTextComponent";
+import TextToSpeechComponent from "./components/TextToSpeechComponent";
+import Header from "./components/Header";
+import Sidebar from "./components/Sidebar";
+import PlayScreen from "./components/PlayScreen";
+import NewClassBtn from "./components/NewClassBtn";
 
 // styles
 import styles from "./page.module.css";
 
 // material-ui
 import { styled, useTheme } from "@mui/material/styles";
+
+
 import MuiAppBar from "@mui/material/AppBar";
+
 import Drawer from "@mui/material/Drawer";
 import List from "@mui/material/List";
 import Divider from "@mui/material/Divider";
@@ -22,20 +31,27 @@ import ListItemButton from "@mui/material/ListItemButton";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
-import MenuIcon from "@mui/icons-material/Menu";
+
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
-import InboxIcon from "@mui/icons-material/Inbox";
-import MailIcon from "@mui/icons-material/Mail";
-import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
 import FolderIcon from "@mui/icons-material/Folder";
 import CreateNewFolderIcon from "@mui/icons-material/CreateNewFolder";
+import Modal from "@mui/material/Modal";
+import Button from "@mui/material/Button";
+import { TextField } from "@mui/material";
+
+import MuiAppBar from "@mui/material/AppBar";
+import Toolbar from "@mui/material/Toolbar";
 
 // images
-import Logohearable from "../../public/logo_hearable.svg";
-import ProfileImage from "../../public/profile.jpg";
 import IconVoice from "../../public/icon_voice.svg";
 import IconVoicePlus from "../../public/icon_voiceplus.svg";
+import Logohearable from "../../public/Logo_hearable.svg";
+import ProfileImage from "../../public/profile.jpg";
+import { TextFields } from "@mui/icons-material";
+import { Fascinate } from "next/font/google";
+import { set } from "mongoose";
+
 
 // MUI styling
 const drawerWidth = 240;
@@ -59,6 +75,17 @@ const Main = styled("main", { shouldForwardProp: (prop) => prop !== "open" })(
   })
 );
 
+
+const DrawerHeader = styled("div")(({ theme }) => ({
+  display: "flex",
+  alignItems: "center",
+  padding: theme.spacing(0, 2),
+  // necessary for content to be below app bar
+  ...theme.mixins.toolbar,
+  justifyContent: "space-between",
+}));
+
+
 const AppBar = styled(MuiAppBar, {
   shouldForwardProp: (prop) => prop !== "open",
 })(({ theme, open }) => ({
@@ -76,21 +103,26 @@ const AppBar = styled(MuiAppBar, {
   }),
 }));
 
-const DrawerHeader = styled("div")(({ theme }) => ({
-  display: "flex",
-  alignItems: "center",
-  padding: theme.spacing(0, 2),
-  // necessary for content to be below app bar
-  ...theme.mixins.toolbar,
-  justifyContent: "space-between",
-}));
 
+const getTime = () => {
+  return new Date().toLocaleTimeString([], {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
 export default function Home() {
-  const theme = useTheme();
+
   const [open, setOpen] = useState(true);
   const [folderData, setFolderData] = useState(null);
   const [classData, setClassData] = useState(null);
   const [showFolder, setShowFolder] = useState("");
+
+  const [openModal, setOpenModal] = useState(false);
+  const [classActive, setClassActive] = useState(false);
+  const [classActiveId, setClassActiveId] = useState(null);
+  const [classActiveText, setClassActiveText] = useState("");
+  const [newClassTitle, setNewClassTitle] = useState(`Class at ${getTime()}`);
+
 
   // fetch folder data
   useEffect(() => {
@@ -117,6 +149,86 @@ export default function Home() {
   const handleDrawerClose = () => {
     setOpen(false);
   };
+
+
+  const handleOpenModal = () => {
+    console.log("open modal");
+    setOpenModal(true);
+  };
+  const handleCloseModal = () => setOpenModal(false);
+
+  const handleNewClassTitle = (title) => {
+    setNewClassTitle(title);
+  }
+
+  const handleCreateNewClass = async () => {
+    let newFolderId = "";
+    // if no folder is selected, create a new folder
+    if (!showFolder) {
+      const url = "/api/folder";
+
+      const response = await fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: `${new Date().toLocaleDateString("en-US", {
+            year: "numeric",
+            month: "2-digit",
+            day: "2-digit",
+          })} ${new Date().toLocaleTimeString([], {
+            hour: "2-digit",
+            minute: "2-digit",
+          })}`,
+          user: "6567af7ed5745139ca11c3c0",
+          classes: [],
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(response.statusText);
+      }
+
+      const postFolder = await response.json();
+      console.log(postFolder);
+      const addFolder = [...folderData, postFolder];
+      setFolderData(addFolder);
+      setShowFolder(postFolder._id);
+      newFolderId = postFolder._id;
+    }
+
+    // make a post request to the db
+    const url = "/api/class";
+
+    const response = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        name: newClassTitle || `Class at ${getTime()}`,
+        folder: showFolder || newFolderId,
+        transcript: "",
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(response.statusText);
+    }
+
+    const postClass = await response.json();
+    console.log(postClass);
+    // const addClass = [...classData, postClass];
+    // setClassData(addClass);
+    fetchClass(showFolder || newFolderId);
+    setClassActiveId(postClass._id);
+    
+    setClassActive(true);
+    setOpenModal(false);
+  }
+
+
 
   const addFolder = async () => {
     // make a post request to the db
@@ -162,13 +274,30 @@ export default function Home() {
     }
 
     const fetchClassData = await response.json();
-    console.log(fetchClassData);
+
+    console.log("fetchClassData", fetchClassData);
     setClassData(fetchClassData);
   };
 
+  const showNote = (classId) => {
+    console.log("show note, classId", classId);
+    setClassActiveId(classId);
+    
+    
+    // get the classData object that match the classId
+    const classDataObject = classData.find(({ _id }) => _id == classId);
+    console.log("classDataObject", classDataObject.textTranscript);
+    setClassActiveText(classDataObject.textTranscript);
+    setClassActive(true);
+  };
+
   return (
-    <div>
-      <AppBar position="fixed" open={open} sx={{ background: "inherit" }}>
+    <main 
+    // className={styles.main}
+    >
+      {/* HEADER */}
+      <AppBar position="fixed" open={open} sx={{ background: "rgb(240,240,240)" }}>
+
         <Toolbar>
           <IconButton
             color="inherit"
@@ -209,10 +338,14 @@ export default function Home() {
             </div>
           </div>
           {/* <Typography variant="h6" noWrap component="div">
-            Persistent drawer
-          </Typography> */}
+
+        Persistent drawer
+      </Typography> */}
         </Toolbar>
       </AppBar>
+
+      {/* SIDEBAR */}
+
       <Drawer
         sx={{
           width: drawerWidth,
@@ -220,7 +353,9 @@ export default function Home() {
           "& .MuiDrawer-paper": {
             width: drawerWidth,
             boxSizing: "border-box",
-            backgroundColor: "inherit",
+
+            backgroundColor: "rgb(80,80,80)",
+
             color: "white",
           },
         }}
@@ -239,7 +374,9 @@ export default function Home() {
           {/* </div> */}
         </DrawerHeader>
 
-        <Divider sx={{ borderColor: "white" }}  />
+
+        <Divider sx={{ borderColor: "white" }} />
+
         <List sx={{ flexGrow: 1 }}>
           {folderData?.map(({ name, _id }, index) => (
             <ListItem
@@ -274,12 +411,23 @@ export default function Home() {
                     // backgroundColor: "red",
                   }}
                 >
-                  <List sx={{ paddingLeft: "1rem" }}>
+
+                  <List sx={{ padding: "0 0 0 1rem" }}>
                     {classData?.map(({ name, _id }, index) => (
-                      <ListItem key={_id} disablePadding>
+                      <ListItem
+                        key={_id}
+                        disablePadding
+                        sx={{
+                          borderTop: "solid",
+                          borderColor: "rgba(255,255,255,0.25)",
+                          borderWidth: "1px",
+                          // background: "gold",
+                        }}
+                      >
                         <ListItemButton
                           onClick={() => {
-                            fetchClass(_id);
+                            showNote(_id);
+
                           }}
                         >
                           <ListItemIcon
@@ -297,11 +445,30 @@ export default function Home() {
                       </ListItem>
                     ))}
                   </List>
-                  <Divider sx={{ borderColor: "rgba(255,255,255,0.25)" , width:"100%", }} />
-                  <div style={{ display: "flex", gap: "0.5rem", marginTop:"1rem" }}>
+
+
+                  <div
+                    style={{
+                      display: "flex",
+                      gap: "0.5rem",
+                      borderTop: "solid",
+                      borderColor: "rgba(255,255,255,0.25)",
+                      borderWidth: "1px",
+                      paddingTop: "0.5rem",
+                      paddingBottom: "0.5rem",
+                      paddingLeft: "1.5rem",
+                      marginLeft: "1rem",
+                      // background: "rgba(255,255,255,0.15)",
+                      cursor: "pointer",
+                    }}
+                    onClick={() => {
+                      handleOpenModal();
+                    }}
+                  >
                     <Image
                       src={IconVoicePlus}
-                      style={{ marginLeft: "2rem" }}
+                      style={{ marginLeft: "1rem" }}
+
                       alt="Logo"
                       width={20}
                       height={20}
@@ -331,12 +498,52 @@ export default function Home() {
           </Typography>
         </div>
       </Drawer>
-      <main className={styles.main}>
-        <h1 style={{ color: "white" }}>Microsoft Hackaton Project</h1>
 
-        <SpeechToTextComponent />
-        <TextToSpeechComponent />
-      </main>
-    </div>
+
+      {/* MODAL */}
+      <Modal
+        open={openModal}
+        onClose={handleCloseModal}
+        aria-labelledby="modal-modal-title"
+        aria-describedby="modal-modal-description"
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          width: "40%",
+          height: "40%",
+          margin: "auto",
+          background: "gold",
+        }}
+      >
+        <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+          <TextField
+            id="classTitle"
+            label="Title"
+            variant="standard"
+            onChange={(e) => {
+              handleNewClassTitle(e.target.value);
+            }}
+          ></TextField>
+          <Button variant="contained" onClick={handleCreateNewClass}>Start</Button>
+        </div>
+      </Modal>
+
+      {/* MAIN */}
+      <div
+        className={styles.main}
+        style={{
+          width: open ? `calc(100% - ${drawerWidth}px)` : "100%",
+          marginLeft: open ? `${drawerWidth}px` : "0px",
+        }}
+      >
+        {classActive ? (
+          <PlayScreen classActiveId={classActiveId} />
+        ) : (
+          <NewClassBtn handleOpenModal={handleOpenModal} />
+        )}
+      </div>
+    </main>
+
   );
 }

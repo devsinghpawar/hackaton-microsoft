@@ -39,6 +39,8 @@ export const GET = async (request) => {
   }
 };
 
+
+
 // post a new class to the db
 export const POST = async (request) => {
   try {
@@ -72,14 +74,14 @@ export const POST = async (request) => {
 export const PUT = async (request) => {
   try {
     const { id, transcript } = await request.json();
-
+console.log("from class/route.js request ", id, transcript);
     await connect();
     const updatedClass = await Class.findOneAndUpdate(
       { _id: id },
       { textTranscript: transcript },
       { new: true }
     );
-
+console.log("from class/route.js > updateClass ", updatedClass);
     return new NextResponse(JSON.stringify(updatedClass), {
       status: 200,
     });
