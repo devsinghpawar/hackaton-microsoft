@@ -19,9 +19,6 @@ import styles from "./page.module.css";
 // material-ui
 import { styled, useTheme } from "@mui/material/styles";
 
-
-import MuiAppBar from "@mui/material/AppBar";
-
 import Drawer from "@mui/material/Drawer";
 import List from "@mui/material/List";
 import Divider from "@mui/material/Divider";
@@ -52,7 +49,6 @@ import { TextFields } from "@mui/icons-material";
 import { Fascinate } from "next/font/google";
 import { set } from "mongoose";
 
-
 // MUI styling
 const drawerWidth = 240;
 
@@ -75,7 +71,6 @@ const Main = styled("main", { shouldForwardProp: (prop) => prop !== "open" })(
   })
 );
 
-
 const DrawerHeader = styled("div")(({ theme }) => ({
   display: "flex",
   alignItems: "center",
@@ -84,7 +79,6 @@ const DrawerHeader = styled("div")(({ theme }) => ({
   ...theme.mixins.toolbar,
   justifyContent: "space-between",
 }));
-
 
 const AppBar = styled(MuiAppBar, {
   shouldForwardProp: (prop) => prop !== "open",
@@ -103,15 +97,13 @@ const AppBar = styled(MuiAppBar, {
   }),
 }));
 
-
 const getTime = () => {
   return new Date().toLocaleTimeString([], {
     hour: "2-digit",
     minute: "2-digit",
   });
-}
+};
 export default function Home() {
-
   const [open, setOpen] = useState(true);
   const [folderData, setFolderData] = useState(null);
   const [classData, setClassData] = useState(null);
@@ -122,7 +114,6 @@ export default function Home() {
   const [classActiveId, setClassActiveId] = useState(null);
   const [classActiveText, setClassActiveText] = useState("");
   const [newClassTitle, setNewClassTitle] = useState(`Class at ${getTime()}`);
-
 
   // fetch folder data
   useEffect(() => {
@@ -150,7 +141,6 @@ export default function Home() {
     setOpen(false);
   };
 
-
   const handleOpenModal = () => {
     console.log("open modal");
     setOpenModal(true);
@@ -159,7 +149,7 @@ export default function Home() {
 
   const handleNewClassTitle = (title) => {
     setNewClassTitle(title);
-  }
+  };
 
   const handleCreateNewClass = async () => {
     let newFolderId = "";
@@ -223,12 +213,10 @@ export default function Home() {
     // setClassData(addClass);
     fetchClass(showFolder || newFolderId);
     setClassActiveId(postClass._id);
-    
+
     setClassActive(true);
     setOpenModal(false);
-  }
-
-
+  };
 
   const addFolder = async () => {
     // make a post request to the db
@@ -282,8 +270,7 @@ export default function Home() {
   const showNote = (classId) => {
     console.log("show note, classId", classId);
     setClassActiveId(classId);
-    
-    
+
     // get the classData object that match the classId
     const classDataObject = classData.find(({ _id }) => _id == classId);
     console.log("classDataObject", classDataObject.textTranscript);
@@ -292,12 +279,15 @@ export default function Home() {
   };
 
   return (
-    <main 
+    <main
     // className={styles.main}
     >
       {/* HEADER */}
-      <AppBar position="fixed" open={open} sx={{ background: "rgb(240,240,240)" }}>
-
+      <AppBar
+        position="fixed"
+        open={open}
+        sx={{ background: "rgb(240,240,240)" }}
+      >
         <Toolbar>
           <IconButton
             color="inherit"
@@ -374,7 +364,6 @@ export default function Home() {
           {/* </div> */}
         </DrawerHeader>
 
-
         <Divider sx={{ borderColor: "white" }} />
 
         <List sx={{ flexGrow: 1 }}>
@@ -411,7 +400,6 @@ export default function Home() {
                     // backgroundColor: "red",
                   }}
                 >
-
                   <List sx={{ padding: "0 0 0 1rem" }}>
                     {classData?.map(({ name, _id }, index) => (
                       <ListItem
@@ -427,7 +415,6 @@ export default function Home() {
                         <ListItemButton
                           onClick={() => {
                             showNote(_id);
-
                           }}
                         >
                           <ListItemIcon
@@ -445,7 +432,6 @@ export default function Home() {
                       </ListItem>
                     ))}
                   </List>
-
 
                   <div
                     style={{
@@ -468,7 +454,6 @@ export default function Home() {
                     <Image
                       src={IconVoicePlus}
                       style={{ marginLeft: "1rem" }}
-
                       alt="Logo"
                       width={20}
                       height={20}
@@ -499,7 +484,6 @@ export default function Home() {
         </div>
       </Drawer>
 
-
       {/* MODAL */}
       <Modal
         open={openModal}
@@ -525,7 +509,9 @@ export default function Home() {
               handleNewClassTitle(e.target.value);
             }}
           ></TextField>
-          <Button variant="contained" onClick={handleCreateNewClass}>Start</Button>
+          <Button variant="contained" onClick={handleCreateNewClass}>
+            Start
+          </Button>
         </div>
       </Modal>
 
@@ -544,6 +530,5 @@ export default function Home() {
         )}
       </div>
     </main>
-
   );
 }
