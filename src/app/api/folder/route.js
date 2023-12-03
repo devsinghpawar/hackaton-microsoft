@@ -18,6 +18,7 @@ export const GET = async (request) => {
     if (user) {
       // get all folders that belong to the user
       const folders = await Folder.find({ user: userId });
+      console.log("from folder/route.js ", folders); 
       return new NextResponse(JSON.stringify(folders), {
         status: 200,
       });
