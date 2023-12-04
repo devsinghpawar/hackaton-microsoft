@@ -27,6 +27,9 @@ const SpeechToTextComponent = ({ classActiveId }) => {
 
   useEffect(() => {
     // fetch data to GET textTranscript from DB
+
+    // *delete classID.js already, work fine on localhost
+
     const fetchTextTranscript = async () => {
       const url = `/api/class/${classActiveId}?classId=${classActiveId}`;
 

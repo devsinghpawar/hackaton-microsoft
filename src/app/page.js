@@ -1,8 +1,8 @@
 "use client";
 // react
 
-import React, { useState, useEffect } from "react";
 
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
 
 // components
@@ -102,7 +102,9 @@ const getTime = () => {
     hour: "2-digit",
     minute: "2-digit",
   });
+
 };
+
 export default function Home() {
   const [open, setOpen] = useState(true);
   const [folderData, setFolderData] = useState(null);
@@ -149,7 +151,9 @@ export default function Home() {
 
   const handleNewClassTitle = (title) => {
     setNewClassTitle(title);
+
   };
+
 
   const handleCreateNewClass = async () => {
     let newFolderId = "";
@@ -214,9 +218,11 @@ export default function Home() {
     fetchClass(showFolder || newFolderId);
     setClassActiveId(postClass._id);
 
+
     setClassActive(true);
     setOpenModal(false);
   };
+
 
   const addFolder = async () => {
     // make a post request to the db
@@ -279,6 +285,7 @@ export default function Home() {
   };
 
   return (
+
     <main
     // className={styles.main}
     >
@@ -288,6 +295,7 @@ export default function Home() {
         open={open}
         sx={{ background: "rgb(240,240,240)" }}
       >
+
         <Toolbar>
           <IconButton
             color="inherit"
@@ -344,8 +352,8 @@ export default function Home() {
             width: drawerWidth,
             boxSizing: "border-box",
 
-            backgroundColor: "rgb(80,80,80)",
 
+            backgroundColor: "rgb(80,80,80)",
             color: "white",
           },
         }}
@@ -509,9 +517,9 @@ export default function Home() {
               handleNewClassTitle(e.target.value);
             }}
           ></TextField>
-          <Button variant="contained" onClick={handleCreateNewClass}>
-            Start
-          </Button>
+
+          <Button variant="contained" onClick={handleCreateNewClass}>Start</Button>
+
         </div>
       </Modal>
 
